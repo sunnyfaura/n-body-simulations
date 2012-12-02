@@ -21,8 +21,8 @@ int main() {
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-
-	Polygon p(0.15, 3, 0xFFFF00FF);
+	//generate more circles
+	Polygon p(0.05, 20, 0xFFFF00FF);
 
 	GLuint mainProgram;
 
@@ -47,6 +47,7 @@ int main() {
 	double acc = 0;
 	double dir = 1;
 
+	//generate more of these coordinates with random initial position
 	double x = 0, y = 0;
 	
 	while ( glfwGetWindowParam( GLFW_OPENED ) && !glfwGetKey(GLFW_KEY_ESC) ) {
@@ -56,6 +57,18 @@ int main() {
 
 		acc += drawElapsed;
 		
+		//the idea here is that the x and y coordinates
+		//follow the newtonian law of gravity
+		//where F = ma = (k*m1*m2)/r^2
+		//once a circle follows these rules
+		//the uniform will pass a matrix to the vertex shader
+
+		//Integrate the fnx
+
+		//Repeat for each circle:
+		//generate x and y coordinates by numerical approx
+		//similar to Reimann's Sum
+
 		while ( acc >= SPF ) {
 			acc -= SPF;
 			
@@ -71,18 +84,15 @@ int main() {
 				x = -1;
 				dir *= -1;
 			}
-			
-			// y += cos(t);
 		}
 
 		//draw
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		//create a for loop that will translate, shade, and draw per circle
 		MAT_SET_TRANSLATE(mat, x, y);
-
 		glUniformMatrix3fv(U_TRANSFORM, 1, GL_FALSE, mat);
-
 		p.draw();
 
 		glfwSwapBuffers();
