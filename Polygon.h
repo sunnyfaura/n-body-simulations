@@ -1,6 +1,14 @@
 #ifndef POLYGON_H__
 #define POLYGON_H__
 
+#ifdef __APPLE__
+	#define glGenVertexArrays(a, b) glGenVertexArraysAPPLE(a, b)
+	#define glBindVertexArray(c) glBindVertexArrayAPPLE(c)
+	#define glDeleteVertexArrays(n, arrays) glDeleteVertexArraysAPPLE( n, arrays);
+#else
+
+#endif
+
 #include <cmath>
 #include "header.h"
 //#include <OpenGL/glext.h>

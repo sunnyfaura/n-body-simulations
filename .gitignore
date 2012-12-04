@@ -1,2 +1,4 @@
 Makefile
 hora.hora
+*.c
+*.a
