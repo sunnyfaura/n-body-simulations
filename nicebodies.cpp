@@ -9,47 +9,36 @@
 using namespace std;
 
 const double SPF = 1.0/60.0;
-const double bounceSpeed = 0.01;
 const int MAX = 50;
 const int CIRCLE_VERT = 20;
-const double MASS_CONST = 1.0;
-const double K_CONST = 5.0;
+const double MASS_CONST = 0.001;
+const double K_CONST = 0.01;
+const double RAD_CONST = 0.05;
 
 #define MAT_SET_TRANSLATE(M, x, y) { M[6] = (x); M[7] = (y); }
 
-/**
-GRAVITATIONAL FORCE = k ( m1 , m2 ) / r * r
-r is the distance between the bodies (IS A VECTOR) 
-
-
-**/
-
 struct Particle{
-	double x, y, currPosX, currPosY,
-		   mass, accelX, accelY,
-		   force;
-
+	double x, y,
+		   mass, xN, yN,
+		   vx, vy;
 };
 
 Particle arr[MAX];
 
 float fRand() {
-	return (float)rand()/RAND_MAX;
-	//return -1.0f + (GLfloat) rand()/ ((GLfloat) RAND_MAX/(2));
+	//return (float)rand()/RAND_MAX;
+	return -1.0f + (GLfloat) rand()/ ((GLfloat) RAND_MAX/(2));
 }
-1
+
 int main() {
 	glfwInit();
-
 	glfwOpenWindow(600, 600, 8, 8, 8, 8, 0, 0, GLFW_WINDOW);
 
 	glewExperimental = GL_TRUE;
 	glewInit();
 
 	//generate more circles
-	
-
-	Polygon p(0.05, 0, 0.1, CIRCLE_VERT, 0xFFFF00FF);
+	Polygon p(RAD_CONST, 0, 0.1, CIRCLE_VERT, 0xFFFF00FF);
 
 	GLuint mainProgram;
 
@@ -72,16 +61,21 @@ int main() {
 
 	double prev = glfwGetTime();
 	double acc = 0;
-	double dir = 1;
 
 	//generate more of these coordinates with random initial position
 	int i = 0;
+	int j = 0;
 	for(; i < MAX; i++){
-			arr[i].x = fRand() - 0.5;
-			arr[i].y = fRand() - 0.5;
-			arr[i].mass = fRand() - 0.5;	
+			arr[i].x = fRand();
+			arr[i].y = fRand();
+			arr[i].mass = MASS_CONST; //fRand();
+			arr[i].vx = 0.5;
+			arr[i].vy = 0.5;
 	}
 	
+
+	double aX = 0.0, aY = 0.0, dx = 0.0, dy = 0.0, inv = 0.0, inv3 = 0.0, force = 0.0, dir = 1;
+
 	while ( glfwGetWindowParam( GLFW_OPENED ) && !glfwGetKey(GLFW_KEY_ESC) ) {
 		const double cur = glfwGetTime();
 		const double drawElapsed = cur - prev;
@@ -101,74 +95,61 @@ int main() {
 		//generate x and y coordinates by numerical approx
 		//similar to Reimann's Sum
 
-		double unitX, unitY, distX, distY, magDist;
 		while ( acc >= SPF ) {
 			acc -= SPF;
-			
-			//update
-			t += SPF;
+			t += SPF; //UPDATE
 
-			for(i = 0; i < MAX - 1; ++i){
-				
-				//arr[i].x =(sin((arr[i].x))*bounceSpeed*dir);// * SPF;
-				//arr[i].y =(sin((arr[i].y))*bounceSpeed*dir);// * bounceSpeed);
-				
-#pragma region STUFF
-				/**		
-				if ( arr[i].x > 1 ) {
-					//arr[i].x = 1;
-					dir *= -1;
-				} else if ( arr[i].x < -1 ) {
-					//arr[i].x = -1;
-					dir *= -1;
-				}
-				if ( arr[i].y > 1 ) {
-					//arr[i].y  = 1;
-					 dir *= -1;
-				} else if ( arr[i].y < -1 ) {
-					//arr[i].y = -1;
-					 dir *= -1;
+			for(i = 0; i < MAX; i++)
+			{
+				aX = 0.0;
+				aY = 0.0;
+
+				for (j = 0; j < MAX; j++)
+				{
+					dx = arr[j].x - arr[i].x;
+					dy = arr[j].y - arr[i].y;
+
+					inv = 1.0/sqrt(dx*dx + dy*dy + RAD_CONST);
+					inv3 = inv * inv * inv;
+
+					force = arr[j].mass * inv3;
+					aX += force*dx;
+					aY += force*dy;
 				}
 
-				if ( arr[i].x < 0.00000000000001 ) {
-					//arr[i].x = 1;
-					dir *= -1;
-				} 
-				if ( arr[i].y < 0.00000000000001 ) {
-					//arr[i].y  = 1;
-					 dir *= -1;
-				}
-				**/
-#pragma endregion
-
-				for (int j = 1 ; j < MAX; j++)
-				{ 
-					
-					distX = arr[i].currPosX - arr[j].currPosX;
-					distY = arr[i].currPosY - arr[j].currPosY;
-					magDist = (distX * distX) + (distY * distY);
-					unitX = distX / sqrt(magDist);
-					unitY = distY / sqrt(magDist);
-					
-					arr[i].force = arr[j].force = ((-K_CONST * arr[i].mass * arr[j].mass) / magDist);
-					
-					arr[i].accelX = (arr[i].force/arr[i].mass) ;
-					arr[i].accelY = (arr[i].force/arr[i].mass) ;
-
-					arr[j].accelX = (arr[j].force/arr[j].mass) ;
-					arr[j].accelY = (arr[j].force/arr[j].mass) ;
-
-					arr[i].x += arr[i].accelX * SPF;
-					arr[i].y += arr[i].accelY * SPF;
-					
-					arr[j].x += arr[j].accelX * SPF;
-					arr[j].y += arr[j].accelY * SPF;
-					//arr[i].forceY = ((-K_CONST * arr[i].mass * arr[j].mass) / magDist);
-
-				}
-				
+				arr[i].xN = arr[i].x + (t*arr[i].vx) + (0.5*t*t*aX);
+				arr[i].yN = arr[i].y + (t*arr[i].vy) + (0.5*t*t*aY);
+				arr[i].vx += t*aX;
+				arr[i].vy += t*aY;
 			}
+
+			for (i = 0; i < MAX; i++)
+			{
+				arr[i].x = arr[i].xN;
+				arr[i].y = arr[i].yN;
+			}
+
 		}
+			
+			for(i = 0; i < MAX; i++)
+			{
+				if ( arr[i].x > 1 ) {
+					arr[i].x *= 1;
+					dir = -1;
+				} else if ( arr[i].x < -1 ) {
+					arr[i].x *= -1;
+					dir = 1;
+				}
+
+				if ( arr[i].y > 1 ) {
+					arr[i].y *= 1;
+					dir = -1;
+				} else if ( arr[i].y < -1 ) {
+					arr[i].y *= -1;
+					dir = 1;
+				}
+			}
+
 
 		//draw
 		glClearColor(0, 0, 0, 1);
@@ -176,7 +157,7 @@ int main() {
 
 		for(i = 0; i < MAX; i++){
 			MAT_SET_TRANSLATE(mat, arr[i].x, arr[i].y);
-			//glUniformMatrix3fv(U_TRANSFORM, 1, GL_FALSE, mat);
+			glUniformMatrix3fv(U_TRANSFORM, 1, GL_FALSE, mat);
 			p.draw(U_TRANSFORM,mat);
 		}
 		glfwSwapBuffers();			
