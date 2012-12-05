@@ -5,13 +5,10 @@
 	#define glGenVertexArrays(a, b) glGenVertexArraysAPPLE(a, b)
 	#define glBindVertexArray(c) glBindVertexArrayAPPLE(c)
 	#define glDeleteVertexArrays(n, arrays) glDeleteVertexArraysAPPLE( n, arrays);
-#else
-
 #endif
 
 #include <cmath>
 #include "header.h"
-//#include <OpenGL/glext.h>
 
 class Polygon {
 	GLuint vbo, vao;
