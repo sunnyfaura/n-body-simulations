@@ -10,7 +10,7 @@ using namespace std;
 
 const double SPF = 1.0/60.0;
 const double G = 0.00001;
-const int MAX = 100;
+const int MAX = 500;
 const int CIRCLE_VERT = 20;
 const double MASS_CONST = 1.0;
 const double K_CONST = 5.0;
@@ -35,7 +35,7 @@ float fRand() {
 int main() {
 	glfwInit();
 
-	glfwOpenWindow(600, 600, 8, 8, 8, 8, 0, 0, GLFW_WINDOW);
+	glfwOpenWindow(800, 800, 8, 8, 8, 8, 0, 0, GLFW_WINDOW);
 
 	glewExperimental = GL_TRUE;
 	glewInit();
@@ -76,7 +76,6 @@ int main() {
 			arr[i].y = fRand() - 0.5;
 			arr[i].m = fRand();	
 	}
-	
 	while ( glfwGetWindowParam( GLFW_OPENED ) && !glfwGetKey(GLFW_KEY_ESC) ) {
 		const double cur = glfwGetTime();
 		const double drawElapsed = cur - prev;
@@ -84,7 +83,6 @@ int main() {
 
 		acc += drawElapsed;
 
-		//double unitX, unitY, distX, distY, magDist;
 		while ( acc >= SPF ) {
 			acc -= SPF;
 			//update
