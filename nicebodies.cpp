@@ -17,7 +17,11 @@ const int CIRCLE_VERT = 20;
 const double MASS_CONST = 1.0;
 const double K_CONST = 5.0;
 
-
+/*
+LINK 
+http://www.browndeertechnology.com/docs/BDT_OpenCL_Tutorial_NBody-rev3.html
+http://www.gotoandplay.it/_articles/2005/08/advCharPhysics.php
+*/
 
 //xPos = 2 * xPos - xPrevPos + a * dt * dt;
 //		xPrevPos = xPos;
