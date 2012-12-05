@@ -8,18 +8,26 @@
 
 using namespace std;
 
+bool verlet = false;
+
 const double SPF = 1.0/60.0;
-const double G = 0.00001;
+double G = 0.00001; 
 const int MAX = 500;
 const int CIRCLE_VERT = 20;
 const double MASS_CONST = 1.0;
 const double K_CONST = 5.0;
+
+
+
+//xPos = 2 * xPos - xPrevPos + a * dt * dt;
+//		xPrevPos = xPos;
 
 #define MAT_SET_TRANSLATE(M, x, y) { M[6] = (x); M[7] = (y); }
 
 struct Particle{
 	double x, y, m;
 	double xnew, ynew;
+	double xprev, yprev;
 	//double znew;
 	double vx, vy;
 	//double vz;x
@@ -29,13 +37,13 @@ Particle arr[MAX];
 
 float fRand() {
 	return (float)rand()/RAND_MAX;
-	//return -1.0f + (GLfloat) rand()/ ((GLfloat) RAND_MAX/(2));
+	//return -1.0f + (float) rand()/ RAND_MAX/2;
 }
 
 int main() {
 	glfwInit();
 
-	glfwOpenWindow(800, 800, 8, 8, 8, 8, 0, 0, GLFW_WINDOW);
+	glfwOpenWindow(600, 600, 8, 8, 8, 8, 0, 0, GLFW_WINDOW);
 
 	glewExperimental = GL_TRUE;
 	glewInit();
@@ -71,11 +79,22 @@ int main() {
 	double ax = 0.0, ay = 0.0;// az = 0.0;
 	double f = 0.0, invr = 0.0, invr3 = 0.0;
 
+
+	//particle initialization
 	for(; i < MAX; i++){
 			arr[i].x = fRand() - 0.5;
 			arr[i].y = fRand() - 0.5;
+			arr[i].xprev = arr[i].x;
+			arr[i].yprev = arr[i].y;
 			arr[i].m = fRand();	
 	}
+
+
+	if (verlet)
+		G = 0.00001;
+	else
+		G = 0.00001;
+
 	while ( glfwGetWindowParam( GLFW_OPENED ) && !glfwGetKey(GLFW_KEY_ESC) ) {
 		const double cur = glfwGetTime();
 		const double drawElapsed = cur - prev;
@@ -96,10 +115,10 @@ int main() {
 					dx = arr[j].x - arr[i].x;
 					dy = arr[j].y - arr[i].y;
 					//dz = arr[j].z - arr[i].z;
-					
+
 					invr = 1.0/sqrt(dx*dx + dy*dy + 0.5);					
 					invr3 = invr * invr * invr;
-					f = arr[j].m*invr3*G;
+					f = -(arr[j].m*invr3*G);
 
 					//accumulate the acceleration from g attraction
 					ax += f*dx;
@@ -107,9 +126,19 @@ int main() {
 					//az += f*dz;
 				}
 				//position update
-				arr[i].xnew = arr[i].x + (t*arr[i].vx) + 0.5*t*t*ax;
-				arr[i].ynew = arr[i].y + (t*arr[i].vy) + 0.5*t*t*ay;
+				if ( !verlet ) {
+					arr[i].xnew = arr[i].x + (t*arr[i].vx) + 0.5*t*t*ax;
+					arr[i].ynew = arr[i].y + (t*arr[i].vy) + 0.5*t*t*ay;
+				}
+				else
+				{	
+					arr[i].xnew += ((2 * arr[i].xnew) - arr[i].xprev + (ax*SPF*SPF))*0.05;
+					arr[i].ynew += ((2 * arr[i].ynew) - arr[i].yprev + (ay*SPF*SPF))*0.05;
+				}
+				
 				//arr[i].znew = arr[i].z + (t*arr[i].vz) + 0.5*t*t*az;
+
+
 
 				//velocity update
 				arr[i].vx += t*ax;
@@ -118,14 +147,26 @@ int main() {
 			}
 
 			for(i = 0; i < MAX; i++ ){
+
+				if (verlet)
+				{
+					arr[i].xprev = arr[i].x;
+					arr[i].yprev = arr[i].y;
+				}	
+
 				arr[i].x = arr[i].xnew;
 				arr[i].y = arr[i].ynew;
+
 				//arr[i].z = arr[i].znew;
 
-				if(arr[i].x > 1) arr[i].vx *= -1;
-				if(arr[i].x < -1) arr[i].vx *= -1;
-				if(arr[i].y > 1) arr[i].vy *= -1;
-				if(arr[i].y < -1) arr[i].vy *= -1;
+				if(arr[i].x > 1) 
+					arr[i].vx *= -1;
+				if(arr[i].x < -1) 
+					arr[i].vx *= -1;
+				if(arr[i].y > 1) 
+					arr[i].vy *= -1;
+				if(arr[i].y < -1) 
+					arr[i].vy *= -1;
 			}
 		}
 
