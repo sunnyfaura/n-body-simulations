@@ -2,9 +2,6 @@
 #define POLYGON_H__
 
 #ifdef __APPLE__
-	#undef glGenVertexArrays(a, b)
-	#undef glBindVertexArray(c)
-	#undef glDeleteVertexArrays(n, arrays)
 	#define glGenVertexArrays(a, b) glGenVertexArraysAPPLE(a, b)
 	#define glBindVertexArray(c) glBindVertexArrayAPPLE(c)
 	#define glDeleteVertexArrays(n, arrays) glDeleteVertexArraysAPPLE( n, arrays);
