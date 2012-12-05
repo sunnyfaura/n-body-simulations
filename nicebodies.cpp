@@ -9,25 +9,20 @@
 using namespace std;
 
 const double SPF = 1.0/60.0;
-const double bounceSpeed = 0.01;
-const int MAX = 50;
+const double G = 0.00001;
+const int MAX = 100;
 const int CIRCLE_VERT = 20;
 const double MASS_CONST = 1.0;
 const double K_CONST = 5.0;
 
 #define MAT_SET_TRANSLATE(M, x, y) { M[6] = (x); M[7] = (y); }
 
-/**
-GRAVITATIONAL FORCE = k ( m1 , m2 ) / r * r
-r is the distance between the bodies (IS A VECTOR) 
-**/
-
 struct Particle{
 	double x, y, m;
 	double xnew, ynew;
 	//double znew;
 	double vx, vy;
-	//double vz;
+	//double vz;x
 };
 
 Particle arr[MAX];
@@ -45,7 +40,7 @@ int main() {
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-	Polygon p(0.01, 0, 0.1, CIRCLE_VERT, 0xFFFF00FF);
+	Polygon p(0.01, 0, 0.1, CIRCLE_VERT, 0x0000FF00);
 
 	GLuint mainProgram;
 
@@ -79,7 +74,7 @@ int main() {
 	for(; i < MAX; i++){
 			arr[i].x = fRand() - 0.5;
 			arr[i].y = fRand() - 0.5;
-			arr[i].m = fRand() - 0.5;	
+			arr[i].m = fRand();	
 	}
 	
 	while ( glfwGetWindowParam( GLFW_OPENED ) && !glfwGetKey(GLFW_KEY_ESC) ) {
@@ -89,7 +84,7 @@ int main() {
 
 		acc += drawElapsed;
 
-		double unitX, unitY, distX, distY, magDist;
+		//double unitX, unitY, distX, distY, magDist;
 		while ( acc >= SPF ) {
 			acc -= SPF;
 			//update
@@ -104,9 +99,9 @@ int main() {
 					dy = arr[j].y - arr[i].y;
 					//dz = arr[j].z - arr[i].z;
 					
-					invr = 1.0/sqrt(dx*dx + dy*dy + 0.05);					
+					invr = 1.0/sqrt(dx*dx + dy*dy + 0.5);					
 					invr3 = invr * invr * invr;
-					f = arr[j].m*invr3;
+					f = arr[j].m*invr3*G;
 
 					//accumulate the acceleration from g attraction
 					ax += f*dx;
@@ -128,6 +123,11 @@ int main() {
 				arr[i].x = arr[i].xnew;
 				arr[i].y = arr[i].ynew;
 				//arr[i].z = arr[i].znew;
+
+				if(arr[i].x > 1) arr[i].vx *= -1;
+				if(arr[i].x < -1) arr[i].vx *= -1;
+				if(arr[i].y > 1) arr[i].vy *= -1;
+				if(arr[i].y < -1) arr[i].vy *= -1;
 			}
 		}
 
