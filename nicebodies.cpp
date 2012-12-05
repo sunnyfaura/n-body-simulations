@@ -45,7 +45,7 @@ int main() {
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-	Polygon p(0.05, 0, 0.1, CIRCLE_VERT, 0xFFFF00FF);
+	Polygon p(0.01, 0, 0.1, CIRCLE_VERT, 0xFFFF00FF);
 
 	GLuint mainProgram;
 
